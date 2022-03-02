@@ -1,6 +1,6 @@
 {
 	"folders": [
-		{ 
+		{
 			"name": "devpacker (go module)",
 			"path": "devpacker/src"
 		},
@@ -18,6 +18,9 @@
 		},
 		{
 			"path": "modepacks"
+		},
+		{
+			"path": "entrypoint-bootstrapper"
 		},
 		{
 			"name": "repository root",

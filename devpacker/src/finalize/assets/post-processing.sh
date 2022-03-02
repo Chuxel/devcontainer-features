@@ -43,21 +43,12 @@ add_to_top_of_file /etc/bash.bashrc
 add_to_top_of_file /etc/profile
 add_to_top_of_file /etc/zsh/zshenv /etc/zsh
 
-# Create common entrypoint location and script
+# Set up entrypoint.d and entrypoint-boostrap
 mkdir -p "${COMMON_ENTRYPOINT_D}"
-cat << EOF > "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap.sh"
-#!/bin/bash
-if [ -z "\${DEV_CONTAINER_ENTRYPOINTS_DONE}" ] && [ -d "${COMMON_ENTRYPOINT_D}" ]; then
-    for entrypoint in "${COMMON_ENTRYPOINT_D}"/*; do
-        if [ -r "\${entrypoint}" ]; then
-            "\${entrypoint}"
-        fi
-    done
-    export DEV_CONTAINER_ENTRYPOINTS_DONE=true
-fi
-exec "\$@"
-EOF
-chmod +x "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap.sh"
+echo "cnb" > "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap.user"
+chmod +x "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap"
+chmod u+s "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap"
+chown root:root "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap" "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap.user"
 
 # Do post-processing feature by feature
 for feature in ${post_procesing_array[@]}; do
@@ -90,6 +81,7 @@ for feature in ${post_procesing_array[@]}; do
             if [ -f "${entrypoint}" ]; then
                 echo "- Wiring up entrypoint ${entrypoint}..."
                 chmod +x "${entrypoint}"
+                chown root:root "${entrypoint}"
                 ln -s "${entrypoint}" "${COMMON_ENTRYPOINT_D}/layer-${buildpack_folder_name}-${feature_id}-$(basename "${entrypoint}")"
             fi
         done
