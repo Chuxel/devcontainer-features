@@ -1,0 +1,14 @@
+#!/bin/bash
+# Alias for apt based on https://github.com/fagiani/apt-buildpack  
+# which is based on https://github.com/heroku/heroku-buildpack-apt
+
+set -eo pipefail
+
+apt_layer="$1"
+
+ln -sf "$apt_layer"/usr/* "$apt_layer/"
+ln -sf "$apt_layer"/sbin/* "$apt_layer/bin/"
+
+export CPATH="\$INCLUDE_PATH"
+export CPPPATH="\$INCLUDE_PATH"
+export PKG_CONFIG_PATH="$apt_layer/usr/lib/x86_64-linux-gnu/pkgconfig:$apt_layer/usr/lib/i386-linux-gnu/pkgconfig:$apt_layer/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"

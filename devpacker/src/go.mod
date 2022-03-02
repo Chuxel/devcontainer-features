@@ -7,6 +7,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/tailscale/hujson v0.0.0-20211215203138-ffd971c5f362
 	gonum.org/v1/gonum v0.9.3
+	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7
 )
 
 require (
@@ -14,7 +15,6 @@ require (
 	github.com/google/go-containerregistry v0.8.0 // indirect
 	github.com/onsi/gomega v1.17.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 )
 
 go 1.17

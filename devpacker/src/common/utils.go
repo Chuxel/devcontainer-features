@@ -190,3 +190,29 @@ func DockerCli(workingDir string, captureOutput bool, args ...string) []byte {
 	}
 	return outputBytes.Bytes()
 }
+
+func ExecuteScript(scriptPath string, cwd string, env []string) (bool, error) {
+	if _, err := os.Stat(scriptPath); err != nil {
+		return false, nil
+	}
+
+	// Execute the script
+	log.Printf("- Executing %s\n", scriptPath)
+	logWriter := log.Writer()
+	command := exec.Command(scriptPath)
+	command.Env = env
+	command.Stdout = logWriter
+	command.Stderr = logWriter
+	command.Dir = cwd
+
+	if err := command.Run(); err != nil {
+		return false, err
+	}
+	exitCode := command.ProcessState.ExitCode()
+	if exitCode != 0 {
+		log.Printf("Error executing %s. Exit code %d.\n", scriptPath, exitCode)
+		return false, NonZeroExitError{ExitCode: exitCode}
+	}
+
+	return true, nil
+}

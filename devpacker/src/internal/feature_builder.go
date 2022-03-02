@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -136,13 +135,8 @@ func (fc FeatureLayerContributor) Contribute(layer libcnb.Layer) (libcnb.Layer, 
 		return layer, nil
 	}
 
-	// Always set targetPath to the layer path we were handed
-	fc.OptionSelections["targetPath"] = layer.Path
-	// Get build environment based on set options
-	env := fc.Feature.BuildEnvironment(fc.OptionSelections, map[string]string{
-		"PROFILE_D":    filepath.Join(layer.Path, "profile.d"),
-		"ENTRYPOINT_D": filepath.Join(layer.Path, common.DevContainerEntrypointD),
-	})
+	// Get the feature build environment
+	env := fc.FeatureBuildEnv(layer.Path)
 
 	// Run acquire script (if it exists)
 	var acquireExecuted bool
@@ -197,6 +191,16 @@ func (fc FeatureLayerContributor) Contribute(layer libcnb.Layer) (libcnb.Layer, 
 	layer.LayerTypes = fc.LayerTypes
 
 	return layer, nil
+}
+
+func (fc FeatureLayerContributor) FeatureBuildEnv(layerPath string) []string {
+	// Always set targetPath to the layer path we were handed
+	fc.OptionSelections["targetPath"] = layerPath
+	// Get build environment based on set options
+	return fc.Feature.BuildEnvironment(fc.OptionSelections, map[string]string{
+		"PROFILE_D":    filepath.Join(layerPath, "profile.d"),
+		"ENTRYPOINT_D": filepath.Join(layerPath, common.DevContainerEntrypointD),
+	})
 }
 
 // See if the build plan includes an entry for this feature. If so, return a LayerContributor for it
@@ -298,24 +302,28 @@ func (fc FeatureLayerContributor) executeFeatureScript(scriptName string, env []
 		log.Printf("- Skipping feature %s. No acquire script.", fc.FullFeatureId())
 		return false, nil
 	}
+	return common.ExecuteScript(scriptPath, fc.Context.Application.Path, env)
+}
 
-	// Execute the script
-	log.Printf("- Executing %s\n", scriptPath)
-	logWriter := log.Writer()
-	command := exec.Command(scriptPath)
-	command.Env = env
-	command.Stdout = logWriter
-	command.Stderr = logWriter
-	command.Dir = fc.Context.Application.Path
+type PrereqLayerContributor struct {
+	// Implements libcnb.LayerContributor
+	// Contribute(context libcnb.ContributeContext) (libcnb.Layer, error)
+	// Name() string
 
-	if err := command.Run(); err != nil {
-		return false, err
+	Contributors []FeatureLayerContributor
+}
+
+// Implementation of libcnb.LayerContributor.Name
+func (plc PrereqLayerContributor) Name() string {
+	return "apt"
+}
+
+// Implementation of libcnb.LayerContributor.Contribute
+func (plc PrereqLayerContributor) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
+	for _, contrib := range plc.Contributors {
+		scriptPath := contrib.Feature.ScriptPath(contrib.Context.Buildpack.Path, "verify-prereqs")
+		env := contrib.FeatureBuildEnv(layer.Path)
+		env = append(env, "BUILD_DIR="+layer.Path)
+		common.ExecuteScript(scriptPath, contrib.Context.Application.Path, env)
 	}
-	exitCode := command.ProcessState.ExitCode()
-	if exitCode != 0 {
-		log.Printf("Error executing %s. Exit code %d.\n", scriptPath, exitCode)
-		return false, common.NonZeroExitError{ExitCode: exitCode}
-	}
-
-	return true, nil
 }

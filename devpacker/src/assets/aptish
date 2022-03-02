@@ -1,0 +1,84 @@
+#!/bin/bash
+# Alias for apt based on https://github.com/fagiani/apt-buildpack  
+# which is based on https://github.com/heroku/heroku-buildpack-apt
+
+set -eo pipefail
+
+apt_layer="${APT_LAYER_DIR}"
+mkdir -p $apt_layer
+
+if compgen -G "${env_dir}/*" > /dev/null; then
+  for var in ${env_dir}/*; do
+    declare "$(basename ${var})=$(<${var})"
+  done
+fi
+
+
+# Store which STACK we are running on in the cache to bust the cache if it changes
+if [ -f $apt_layer/STACK ]; then
+  CACHED_STACK=$(cat "$apt_layer/STACK")
+else
+  CACHED_STACK=$CNB_STACK_ID
+fi
+
+# Ensure we store the STACK in the cache for next time.
+echo "$CNB_STACK_ID" > "$apt_layer/STACK"
+
+APT_CACHE_DIR="$apt_layer/cache"
+APT_STATE_DIR="$apt_layer/state"
+APT_SOURCELIST_DIR="$apt_layer/sources"   # place custom sources.list here
+APT_SOURCES="$APT_SOURCELIST_DIR/sources.list"
+APT_VERSION=$(apt-get -v | awk 'NR == 1{ print $2 }')
+
+if [[ $CACHED_STACK == ${CNB_STACK_ID} ]] ; then
+  topic "Reusing cache"
+else
+  # Aptfile changed or does not exist or STACK changed
+  topic "Detected Aptfile changes, flushing cache"
+  rm -rf $APT_CACHE_DIR
+  mkdir -p "$APT_CACHE_DIR/archives/partial"
+  mkdir -p "$APT_STATE_DIR/lists/partial"
+  mkdir -p "$APT_SOURCELIST_DIR"   # make dir for sources
+  cp -f "Aptfile" "$apt_layer/Aptfile"
+  cat "/etc/apt/sources.list" > "$APT_SOURCES"    # no cp here
+  # add custom repositories from Aptfile to sources.list
+  # like>>    :repo:deb http://cz.archive.ubuntu.com/ubuntu artful main universe
+  if grep -q -e "^:repo:" Aptfile; then
+    topic "Adding custom repositories"
+    cat Aptfile | grep -s -e "^:repo:" | sed 's/^:repo:\(.*\)\s*$/\1/g' >> $APT_SOURCES
+  fi
+fi
+
+apt-get "$@"
+
+topic "Writing profile script"
+mkdir -p $apt_layer/.profile.d
+cat <<EOF >$apt_layer/.profile.d/000_apt.sh
+export PATH="$apt_layer/usr/bin:\$PATH"
+export LD_LIBRARY_PATH="$apt_layer/usr/lib/x86_64-linux-gnu:$apt_layer/usr/lib/i386-linux-gnu:$apt_layer/usr/lib:\$LD_LIBRARY_PATH"
+export LIBRARY_PATH="$apt_layer/usr/lib/x86_64-linux-gnu:$apt_layer/usr/lib/i386-linux-gnu:$apt_layer/usr/lib:\$LIBRARY_PATH"
+export INCLUDE_PATH="$apt_layer/usr/include:$apt_layer/usr/include/x86_64-linux-gnu:\$INCLUDE_PATH"
+export CPATH="\$INCLUDE_PATH"
+export CPPPATH="\$INCLUDE_PATH"
+export PKG_CONFIG_PATH="$apt_layer/usr/lib/x86_64-linux-gnu/pkgconfig:$apt_layer/usr/lib/i386-linux-gnu/pkgconfig:$apt_layer/usr/lib/pkgconfig:\$PKG_CONFIG_PATH"
+EOF
+
+apt_env_dir=$apt_layer/env
+mkdir -p $apt_env_dir
+echo -n "$apt_layer/usr/bin:$PATH" > $apt_env_dir/PATH.prepend
+echo -n "$apt_layer/usr/lib/x86_64-linux-gnu:$apt_layer/usr/lib/i386-linux-gnu:$apt_layer/usr/lib" > $apt_env_dir/LD_LIBRARY_PATH.prepend
+echo -n "$apt_layer/usr/lib/x86_64-linux-gnu:$apt_layer/usr/lib/i386-linux-gnu:$apt_layer/usr/lib" > $apt_env_dir/LIBRARY_PATH.prepend
+echo -n "$apt_layer/usr/include:$apt_layer/usr/include/x86_64-linux-gnu" > $apt_env_dir/INCLUDE_PATH.prepend
+cp $apt_env_dir/INCLUDE_PATH.prepend $apt_env_dir/CPATH.prepend
+cp $apt_env_dir/INCLUDE_PATH.prepend $apt_env_dir/CPPPATH.prepend
+echo -n "$apt_layer/usr/lib/x86_64-linux-gnu/pkgconfig:$apt_layer/usr/lib/i386-linux-gnu/pkgconfig:$apt_layer/usr/lib/pkgconfig" > $apt_env_dir/PKG_CONFIG_PATH.prepend
+
+echo -n ":" > $apt_env_dir/PATH.delim
+echo -n ":" > $apt_env_dir/LD_LIBRARY_PATH.delim
+echo -n ":" > $apt_env_dir/LIBRARY_PATH.delim
+echo -n ":" > $apt_env_dir/INCLUDE_PATH.delim
+echo -n ":" > $apt_env_dir/CPATH.delim
+echo -n ":" > $apt_env_dir/CPPPATH.delim
+echo -n ":" > $apt_env_dir/PKG_CONFIG_PATH.delim
+
+
