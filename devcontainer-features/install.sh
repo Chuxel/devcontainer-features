@@ -128,12 +128,8 @@ add_env_boostrap_to_file /etc/zsh/zshrc /etc/zsh
 add_env_boostrap_to_file /etc/zsh/zprofile /etc/zsh
 
 # Execute actual feature installs
-conditional_install buildpack-test
-conditional_install buildpack-test-2
-conditional_install python
-conditional_install nodejs
-conditional_install packcli
-conditional_install vscode
-conditional_install googlechrome
+for feature in "$(dirname "{BASH_SOURCE[0]}")"/features/*; do
+    conditional_install "$(basename "${feature}")"
+done
 
 echo "(*) Done!"
