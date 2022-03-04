@@ -1,0 +1,95 @@
+#!/bin/bash
+set -e
+FEATURE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FEATURE_ID="$(basename "${FEATURE_PATH}")"
+ACTION_URL="https://github.com/actions/setup-go/archive/refs/tags/v3.0.0.tar.gz"
+
+# Import common utils
+. "${FEATURE_PATH}/../../common/utils.sh"
+. "${FEATURE_PATH}/../../common/action-shim.sh"
+
+set_var_to_option_value "${FEATURE_ID}" buildmode build_mode "devcontainer"
+set_var_to_option_value "${FEATURE_ID}" profile_d profile_d "/usr/local/etc/dev-container-features/profile.d"
+set_var_to_option_value "${FEATURE_ID}" targetpath target_path "/usr/local"
+set_var_to_option_value "${FEATURE_ID}" version version "latest"
+set_var_to_option_value "${FEATURE_ID}" installtools install_tools "default"
+
+# Set version variable action expects
+if [ "${version}" = "latest" ]; then
+    version="*"
+fi
+export _BUILD_ARG_SETUP_GO_GO_VERSION="${version}"
+
+# Update install_tools based on build_mode
+if [ "${install_tools}" = "default" ]; then
+    if [ "${build_mode}" = "devcontainer" ]; then
+        install_tools="true"
+    else
+        install_tools="false"
+    fi
+fi
+
+# Skip if already run with same args - handle caching
+marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"
+if ! check_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"; then
+    echo "Go ${version} already installed. Skipping..."
+    exit 0
+fi
+
+# Currently only supports x86_64
+. /etc/os-release
+architecture="$(dpkg --print-architecture)"
+if [ "${architecture}" != "amd64" ]; then
+    echo "Unsupported architecture: ${architecture}"
+    exit 1
+fi
+
+# Run the GitHub Action
+run_action "${FEATURE_ID}" "${ACTION_URL}" "${target_path}" "${profile_d}"
+
+# Update go bin location in env file to be user specific rather than root
+sed -i s~/root/go/bin~\$\{HOME\}/go/bin~g "${profile_d}/action-setup-go-env.sh"
+
+# Symlink go binaries for non-interactive/login use
+out_dir="$(find "${target_path}"/go/*/* -maxdepth 0 -type d)"
+ln -s "${out_dir}"/bin/* "${target_path}/bin/"
+
+# Setup go tools if in devcontainer mode
+# Install Go tools that are isImportant && !replacedByGopls based on
+# https://github.com/golang/vscode-go/blob/v0.31.1/src/goToolsInformation.ts
+GO_TOOLS="\
+    golang.org/x/tools/gopls@latest \
+    honnef.co/go/tools/cmd/staticcheck@latest \
+    golang.org/x/lint/golint@latest \
+    github.com/mgechev/revive@latest \
+    github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest \
+    github.com/ramya-rao-a/go-outline@latest \
+    github.com/go-delve/delve/cmd/dlv@latest \
+    github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
+if [ "${install_tools}" = "true" ]; then
+    echo "Installing common Go tools..."
+    mkdir -p /tmp/gotools /usr/local/etc/vscode-dev-containers ${target_path}/bin
+    cd /tmp/gotools
+    export GOPATH=/tmp/gotools
+    export GOCACHE=/tmp/gotools/cache
+
+    # Use go get for versions of go under 1.16
+    go_install_command=install
+    if [[ "1.16" > "$(go version | grep -oP 'go\K[0-9]+\.[0-9]+(\.[0-9]+)?')" ]]; then
+        export GO111MODULE=on
+        go_install_command=get
+        echo "Go version < 1.16, using go get."
+    fi 
+
+    (echo "${GO_TOOLS}" | xargs -n 1 go ${go_install_command} -v )2>&1 | tee -a /usr/local/etc/vscode-dev-containers/go.log
+
+    # Move Go tools into path and clean up
+    mv /tmp/gotools/bin/* ${target_path}/bin/
+
+    rm -rf /tmp/gotools
+fi
+
+# Clean up
+rm -rf /tmp/action-shim
+
+update_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"

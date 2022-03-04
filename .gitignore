@@ -1,3 +1,4 @@
 /devcontainer-features/devcontainer-features.env
 out
 dist
+node_modules

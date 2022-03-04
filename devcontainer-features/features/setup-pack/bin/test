@@ -1,0 +1,4 @@
+#!/bin/bash
+# Script to smoke test that the featue is installed correctly
+set -e
+pack --version

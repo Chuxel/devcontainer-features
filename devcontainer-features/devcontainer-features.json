@@ -6,13 +6,19 @@
 			"options": {
 				"version": {
 					"type": "string",
-					"enum": ["latest"],
+					"enum": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "VS Code version (currently ignored)"
 				},
 				"edition": {
 					"type": "string",
-					"enum": [ "stable", "insiders", "both" ],
+					"enum": [
+						"stable",
+						"insiders",
+						"both"
+					],
 					"default": "stable",
 					"description": "VS Code edition to install"
 				}
@@ -24,7 +30,9 @@
 			"options": {
 				"version": {
 					"type": "string",
-					"enum": ["latest"],
+					"enum": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "Chrome version (currently ignored)"
 				}
@@ -36,13 +44,17 @@
 			"options": {
 				"version": {
 					"type": "string",
-					"proposals": ["latest"],
+					"proposals": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "Pack CLI version"
 				},
 				"targetPath": {
 					"type": "string",
-					"proposals": ["/usr/local"],
+					"proposals": [
+						"/usr/local"
+					],
 					"default": "/usr/local",
 					"description": "Target install path"
 				}
@@ -54,19 +66,26 @@
 			"options": {
 				"version": {
 					"type": "string",
-					"proposals": ["latest"],
+					"proposals": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "Python version"
 				},
 				"targetPath": {
 					"type": "string",
-					"proposals": ["/usr/local"],
+					"proposals": [
+						"/usr/local"
+					],
 					"default": "/usr/local",
 					"description": "Target install path"
 				},
 				"buildMode": {
 					"type": "string",
-					"enum": ["production", "devcontainer"],
+					"enum": [
+						"production",
+						"devcontainer"
+					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
 				}
@@ -82,7 +101,13 @@
 			"options": {
 				"version": {
 					"type": "string",
-					"proposals": [ "lts", "latest", "16", "14", "12" ],
+					"proposals": [
+						"lts",
+						"latest",
+						"16",
+						"14",
+						"12"
+					],
 					"default": "lts",
 					"description": "Select or enter a Node.js version to install"
 				},
@@ -103,18 +128,25 @@
 				},
 				"targetPath": {
 					"type": "string",
-					"proposals": ["/usr/local"],
+					"proposals": [
+						"/usr/local"
+					],
 					"default": "/usr/local",
 					"description": "Target install path"
 				},
 				"buildMode": {
 					"type": "string",
-					"enum": ["production", "devcontainer"],
+					"enum": [
+						"production",
+						"devcontainer"
+					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
 				}
 			},
-			"extensions": ["dbaeumer.vscode-eslint"]
+			"extensions": [
+				"dbaeumer.vscode-eslint"
+			]
 		},
 		{
 			"id": "buildpack-test",
@@ -125,32 +157,47 @@
 				"TEST2": "${TEST}"
 			},
 			"init": true,
-			"capAdd": [ "SYS_PTRACE" ],
-			"securityOpt": [ "seccomp=unconfined" ],
-			"extensions": ["mutantdino.resourcemonitor"],
+			"capAdd": [
+				"SYS_PTRACE"
+			],
+			"securityOpt": [
+				"seccomp=unconfined"
+			],
+			"extensions": [
+				"mutantdino.resourcemonitor"
+			],
 			"entrypoint": "/usr/local/etc/dev-container-features/entrypoint-bootstrap.sh",
 			"options": {
 				"version": {
 					"type": "string",
-					"proposals": ["latest"],
+					"proposals": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "Version"
 				},
 				"foo": {
 					"type": "string",
-					"proposals": ["foo"],
+					"proposals": [
+						"foo"
+					],
 					"default": "foo",
 					"description": "Foo"
 				},
 				"targetPath": {
 					"type": "string",
-					"proposals": ["/usr/local"],
+					"proposals": [
+						"/usr/local"
+					],
 					"default": "/usr/local",
 					"description": "Target install path"
 				},
 				"buildMode": {
 					"type": "string",
-					"enum": ["production", "devcontainer"],
+					"enum": [
+						"production",
+						"devcontainer"
+					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
 				}
@@ -165,34 +212,212 @@
 				"TEST2-2": "${TEST2}"
 			},
 			"privileged": true,
-			"capAdd": [ "SYS_PTRACE" ],
-			"securityOpt": [ "seccomp=unconfined" ],
-			"extensions": ["mutantdino.resourcemonitor","chrisdias.vscode-opennewinstance"],
+			"capAdd": [
+				"SYS_PTRACE"
+			],
+			"securityOpt": [
+				"seccomp=unconfined"
+			],
+			"extensions": [
+				"mutantdino.resourcemonitor",
+				"chrisdias.vscode-opennewinstance"
+			],
 			"entrypoint": "/usr/local/etc/dev-container-features/entrypoint-bootstrap.sh",
 			"options": {
 				"version": {
 					"type": "string",
-					"proposals": ["latest"],
+					"proposals": [
+						"latest"
+					],
 					"default": "latest",
 					"description": "Version"
 				},
 				"foo": {
 					"type": "string",
-					"proposals": ["foo"],
+					"proposals": [
+						"foo"
+					],
 					"default": "foo",
 					"description": "Foo"
 				},
 				"targetPath": {
 					"type": "string",
-					"proposals": ["/usr/local"],
+					"proposals": [
+						"/usr/local"
+					],
 					"default": "/usr/local",
 					"description": "Target install path"
 				},
 				"buildMode": {
 					"type": "string",
-					"enum": ["production", "devcontainer"],
+					"enum": [
+						"production",
+						"devcontainer"
+					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
+				}
+			}
+		},
+		{
+			"id": "setup-python",
+			"name": "Setup Python",
+			"options": {
+				"version": {
+					"type": "string",
+					"proposals": [
+						"latest"
+					],
+					"default": "latest",
+					"description": "Python version"
+				},
+				"targetPath": {
+					"type": "string",
+					"proposals": [
+						"/usr/local"
+					],
+					"default": "/usr/local",
+					"description": "Target install path"
+				},
+				"buildMode": {
+					"type": "string",
+					"enum": [
+						"production",
+						"devcontainer"
+					],
+					"default": "devcontainer",
+					"description": "Select the production build mode to skip installing development tools."
+				},
+				"extensions": [
+					"ms-python.python",
+					"ms-python.vscode-pylance"
+				]
+			}
+		},
+		{
+			"id": "setup-go",
+			"name": "Setup Go",
+			"options": {
+				"version": {
+					"type": "string",
+					"proposals": [
+						"latest"
+					],
+					"default": "latest",
+					"description": "Go version"
+				},
+				"installTools": {
+					"type": "boolean",
+					"default": true,
+					"description": "Install developer tools?"
+				},
+				"targetPath": {
+					"type": "string",
+					"proposals": [
+						"/usr/local"
+					],
+					"default": "/usr/local",
+					"description": "Target install path"
+				},
+				"buildMode": {
+					"type": "string",
+					"enum": [
+						"production",
+						"devcontainer"
+					],
+					"default": "devcontainer",
+					"description": "Select the production build mode to skip installing development tools."
+				},
+				"capAdd": [
+					"SYS_PTRACE"
+				],
+				"securityOpt": [
+					"seccomp=unconfined"
+				],
+				"settings": {
+					"go.toolsManagement.checkForUpdates": "local",
+					"go.useLanguageServer": true
+				},
+				"extensions": [
+					"golang.Go"
+				]
+			}
+		},
+		{
+			"id": "setup-java",
+			"name": "Setup Java",
+			"options": {
+				"version": {
+					"type": "string",
+					"proposals": [
+						"latest"
+					],
+					"default": "latest",
+					"description": "Java version"
+				},
+				"distribution": {
+					"type": "string",
+					"proposals": [
+						"microsoft",
+						"temurin",
+						"zulu",
+						"liberica"
+					],
+					"default": "microsoft",
+					"description": "Java distribution version"
+				},
+				"java-package:": {
+					"type": "string",
+					"proposals": [
+						"jdk",
+						"jre",
+						"jdk+fx",
+						"jre+fx"
+					],
+					"default": "jdk",
+					"description": "The package type (jdk, jre, jdk+fx, jre+fx)"
+				},
+				"targetPath": {
+					"type": "string",
+					"proposals": [
+						"/usr/local"
+					],
+					"default": "/usr/local",
+					"description": "Target install path"
+				},
+				"buildMode": {
+					"type": "string",
+					"enum": [
+						"production",
+						"devcontainer"
+					],
+					"default": "devcontainer",
+					"description": "Select the production build mode to skip installing development tools."
+				},
+				"extensions": [
+					"vscjava.vscode-java-pack"
+				]
+			}
+		},
+		{
+			"id": "setup-pack",
+			"name": "Setup pack CLI",
+			"options": {
+				"version": {
+					"type": "string",
+					"proposals": [
+						"0.24.0"
+					],
+					"default": "0.24.0",
+					"description": "Pack CLI version"
+				},
+				"targetPath": {
+					"type": "string",
+					"proposals": [
+						"/usr/local"
+					],
+					"default": "/usr/local",
+					"description": "Target install path"
 				}
 			}
 		}

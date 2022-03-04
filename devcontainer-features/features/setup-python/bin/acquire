@@ -1,0 +1,88 @@
+#!/bin/bash
+set -e
+FEATURE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FEATURE_ID="$(basename "${FEATURE_PATH}")"
+ACTION_URL="https://github.com/actions/setup-python/archive/refs/tags/v3.0.0.tar.gz"
+
+# Currently only supports Ubuntu x86_64
+. /etc/os-release
+architecture="$(dpkg --print-architecture)"
+if [ "${ID}" != "ubuntu" ] && [ "${ID_LIKE}" != "ubuntu" ]; then
+    echo "Unsupported distribution: ${ID}"
+    exit 1
+fi
+if [ "${architecture}" != "amd64" ]; then
+    echo "Unsupported architecture: ${architecture}"
+    exit 1
+fi
+
+# Import common utils
+. "${FEATURE_PATH}/../../common/utils.sh"
+. "${FEATURE_PATH}/../../common/action-shim.sh"
+
+set_var_to_option_value "${FEATURE_ID}" buildmode build_mode "devcontainer"
+set_var_to_option_value "${FEATURE_ID}" profile_d profile_d "/usr/local/etc/dev-container-features/profile.d"
+set_var_to_option_value "${FEATURE_ID}" targetpath target_path "/usr/local"
+set_var_to_option_value "${FEATURE_ID}" version version "latest"
+set_var_to_option_value "${FEATURE_ID}" installtools install_tools "default"
+
+# Set version variable action expects
+if [ "${version}" = "latest" ]; then
+    version="*"
+fi
+export _BUILD_ARG_SETUP_PYTHON_PYTHON_VERSION="${version}"
+
+# Update install_tools based on build_mode
+if [ "${install_tools}" = "default" ]; then
+    if [ "${build_mode}" = "devcontainer" ]; then
+        install_tools="true"
+    else
+        install_tools="false"
+    fi
+fi
+
+# Skip if already run with same args - handle caching
+marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"
+if ! check_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"; then
+    echo "Python ${version} already installed. Skipping..."
+    exit 0
+fi
+
+# Run the GitHub Action
+run_action "${FEATURE_ID}" "${ACTION_URL}" "${target_path}" "${profile_d}"
+
+# Delete source code, log files since we do not need it
+out_dir="$(find "${target_path}"/Python/*/* -maxdepth 0 -type d)"
+rm -f "${out_dir}/Python-*.tgz" "${out_dir}/build_output.txt" "${out_dir}/tools_structure.txt" "${out_dir}/python"
+# Link to bin
+ln -s "${out_dir}"/bin/* "${target_path}/bin/"
+
+# Install tools (if enabled)
+DEFAULT_UTILS=("pylint" "flake8" "autopep8" "black" "yapf" "mypy" "pydocstyle" "pycodestyle" "bandit" "pipenv" "virtualenv")
+if [ "${install_tools}" = "true" ]; then
+    # Install tools
+    echo "Installing Python tools..."
+    export PYTHONUSERBASE=/tmp/pip-tmp
+    export PIP_CACHE_DIR=/tmp/pip-tmp/cache
+    export PIPX_HOME="${target_path}/pipx"
+    export PIPX_BIN_DIR="${target_path}/bin"
+    pipx_path=""
+    if ! type pipx > /dev/null 2>&1; then
+        "${target_path}"/bin/pip3 install --disable-pip-version-check --no-cache-dir --user pipx 2>&1
+        /tmp/pip-tmp/bin/pipx install --pip-args=--no-cache-dir pipx
+        pipx_path="/tmp/pip-tmp/bin/"
+    fi
+    for util in ${DEFAULT_UTILS[@]}; do
+        if ! type ${util} > /dev/null 2>&1; then
+            ${pipx_path}pipx install --system-site-packages --pip-args '--no-cache-dir --force-reinstall' ${util}
+        else
+            echo "${util} already installed. Skipping."
+        fi
+    done
+    rm -rf /tmp/pip-tmp
+fi
+
+# Clean up
+rm -rf /tmp/action-shim
+
+update_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"

@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+FEATURE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FEATURE_ID="$(basename "${FEATURE_PATH}")"
+ACTION_URL="https://github.com/andrioid/setup-pack/archive/refs/tags/v1.0.1.tar.gz"
+
+# Import common utils
+. "${FEATURE_PATH}/../../common/utils.sh"
+. "${FEATURE_PATH}/../../common/action-shim.sh"
+
+set_var_to_option_value "${FEATURE_ID}" buildmode build_mode "devcontainer"
+set_var_to_option_value "${FEATURE_ID}" profile_d profile_d "/usr/local/etc/dev-container-features/profile.d"
+set_var_to_option_value "${FEATURE_ID}" targetpath target_path "/usr/local"
+set_var_to_option_value "${FEATURE_ID}" version version "0.24.0"
+
+# Set version variable action expects
+export _BUILD_ARG_SETUP_PACK_PACK_VERSION="${version}"
+
+# Skip if already run with same args - handle caching
+marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"
+if ! check_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"; then
+    echo "Pack ${version} already installed. Skipping..."
+    exit 0
+fi
+
+# Run the GitHub Action
+run_action "${FEATURE_ID}" "${ACTION_URL}" "${target_path}" "${profile_d}"
+
+# Delete source code, log files since we do not need it
+out_dir="$(find "${target_path}"/pack/*/* -maxdepth 0 -type d)"
+# Link to bin
+ln -s "${out_dir}"/* "${target_path}/bin/"
+# Clean up
+rm -rf /tmp/action-shim
+
+update_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"

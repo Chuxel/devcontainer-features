@@ -1,0 +1,11 @@
+{
+  "name": "action-shim",
+  "version": "0.0.1",
+  "description": "",
+  "main": "action-shim.js",
+  "scripts": {},
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
