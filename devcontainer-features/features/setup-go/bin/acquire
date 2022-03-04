@@ -4,6 +4,13 @@ FEATURE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FEATURE_ID="$(basename "${FEATURE_PATH}")"
 ACTION_URL="https://github.com/actions/setup-go/archive/refs/tags/v3.0.0.tar.gz"
 
+# Currently only supports x86_64
+architecture="$(dpkg --print-architecture)"
+if [ "${architecture}" != "amd64" ]; then
+    echo "Unsupported architecture: ${architecture}"
+    exit 1
+fi
+
 # Import common utils
 . "${FEATURE_PATH}/../../common/utils.sh"
 . "${FEATURE_PATH}/../../common/action-shim.sh"
@@ -34,14 +41,6 @@ marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel
 if ! check_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"; then
     echo "Go ${version} already installed. Skipping..."
     exit 0
-fi
-
-# Currently only supports x86_64
-. /etc/os-release
-architecture="$(dpkg --print-architecture)"
-if [ "${architecture}" != "amd64" ]; then
-    echo "Unsupported architecture: ${architecture}"
-    exit 1
 fi
 
 # Run the GitHub Action

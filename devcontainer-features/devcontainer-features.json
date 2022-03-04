@@ -371,7 +371,7 @@
 					"default": "microsoft",
 					"description": "Java distribution version"
 				},
-				"javaPackage:": {
+				"javaPackage": {
 					"type": "string",
 					"proposals": [
 						"jdk",
