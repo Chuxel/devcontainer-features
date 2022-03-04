@@ -13,11 +13,12 @@ set_var_to_option_value "${FEATURE_ID}" profile_d profile_d "/usr/local/etc/dev-
 set_var_to_option_value "${FEATURE_ID}" targetpath target_path "/usr/local"
 set_var_to_option_value "${FEATURE_ID}" version version "latest"
 
-# Set version, architecture variable action expects
+# Set version, javapackage, architecture to option names the action expects
 if [ "${version}" = "latest" ]; then
     version="*"
 fi
-export _BUILD_ARG_SETUP_JAVA_JAVA_VERSION="${version}"
+set_option_value "${FEATURE_ID}" java_version "${version}"
+copy_option_value "${FEATURE_ID}" javapackage java_package "jdk"
 architecture="$(dpkg --print-architecture)"
 case "${architecture}" in
     amd64) architecture="x64";
@@ -27,7 +28,7 @@ case "${architecture}" in
     i386 | i686) architecture="x86";
         ;;
 esac
-export _BUILD_ARG_SETUP_JAVA_ARCHITECTURE="${architecture}"
+set_option_value "${FEATURE_ID}" architecture "${architecture}"
 
 # Skip if already run with same args - handle caching
 marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"

@@ -14,7 +14,7 @@ set_var_to_option_value "${FEATURE_ID}" targetpath target_path "/usr/local"
 set_var_to_option_value "${FEATURE_ID}" version version "0.24.0"
 
 # Set version variable action expects
-export _BUILD_ARG_SETUP_PACK_PACK_VERSION="${version}"
+set_option_value "${FEATURE_ID}" pack_version "${version}"
 
 # Skip if already run with same args - handle caching
 marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"

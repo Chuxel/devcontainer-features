@@ -30,7 +30,7 @@ set_var_to_option_value "${FEATURE_ID}" installtools install_tools "default"
 if [ "${version}" = "latest" ]; then
     version="*"
 fi
-export _BUILD_ARG_SETUP_PYTHON_PYTHON_VERSION="${version}"
+set_option_value "${FEATURE_ID}" python_version "${version}"
 
 # Update install_tools based on build_mode
 if [ "${install_tools}" = "default" ]; then

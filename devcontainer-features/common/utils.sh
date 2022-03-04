@@ -180,6 +180,23 @@ set_var_to_option_value() {
     declare -g $3="${!__retval:-"$4"}"
 }
 
+# set_option_value <feature id> <option name> <value>
+set_option_value() {
+    get_buld_arg_env_var_name "$1" "$2"
+    echo "${__retval}=$3"
+    declare -g -x ${__retval}="$3"
+}
+
+# copy_option_value <feature id> <option name> <option name> <default value>
+copy_option_value() {
+    get_buld_arg_env_var_name "$1" "$2"
+    in_option_value="${!__retval:-"$4"}"
+    get_buld_arg_env_var_name "$1" "$3"
+    out_option_var_name="${__retval}"
+    echo "${out_option_var_name}=${in_option_value}"
+    declare -g -x ${out_option_var_name}="${in_option_value}"
+}
+
 # run_if_exists <command> <command arguments>...
 run_if_exists() {
     if [ -e "$1" ]; then

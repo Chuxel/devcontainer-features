@@ -1,7 +1,7 @@
 {
 	"publisher": "chuxel",
 	"featureSet": "devcontainer-features",
-	"version": "v0.1.13",
+	"version": "v0.1.14",
 	"apiVersion": "0.7",
 	"stacks": [
 		"com.chuxel.stacks.test.bionic",
