@@ -271,6 +271,11 @@
 					"default": "latest",
 					"description": "Python version"
 				},
+				"installTools": {
+					"type": "boolean",
+					"default": true,
+					"description": "Install developer tools?"
+				},
 				"targetPath": {
 					"type": "string",
 					"proposals": [
@@ -287,12 +292,12 @@
 					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
-				},
-				"extensions": [
-					"ms-python.python",
-					"ms-python.vscode-pylance"
-				]
-			}
+				}
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
 		},
 		{
 			"id": "setup-go",
@@ -327,21 +332,21 @@
 					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
-				},
-				"capAdd": [
-					"SYS_PTRACE"
-				],
-				"securityOpt": [
-					"seccomp=unconfined"
-				],
-				"settings": {
-					"go.toolsManagement.checkForUpdates": "local",
-					"go.useLanguageServer": true
-				},
-				"extensions": [
-					"golang.Go"
-				]
-			}
+				}
+			},
+			"capAdd": [
+				"SYS_PTRACE"
+			],
+			"securityOpt": [
+				"seccomp=unconfined"
+			],
+			"settings": {
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true
+			},
+			"extensions": [
+				"golang.Go"
+			]
 		},
 		{
 			"id": "setup-java",
@@ -393,11 +398,11 @@
 					],
 					"default": "devcontainer",
 					"description": "Select the production build mode to skip installing development tools."
-				},
-				"extensions": [
-					"vscjava.vscode-java-pack"
-				]
-			}
+				}
+			},
+			"extensions": [
+				"vscjava.vscode-java-pack"
+			]
 		},
 		{
 			"id": "setup-pack",
