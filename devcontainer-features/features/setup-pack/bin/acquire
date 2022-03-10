@@ -17,9 +17,8 @@ set_var_to_option_value "${FEATURE_ID}" version version "0.24.0"
 set_option_value "${FEATURE_ID}" pack_version "${version}"
 
 # Skip if already run with same args - handle caching
-marker_path="${target_path}/etc/dev-container-features/markers/github.com/chuxel/devcontainer-features/${FEATURE_ID}-${SCRIPT_NAME}.marker"
-if ! check_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"; then
-    echo "Pack ${version} already installed. Skipping..."
+if ! check_automatic_marker "${FEATURE_ID}" "${target_path}"; then
+    echo "${FEATURE_ID} already run with these options. Skipping..."
     exit 0
 fi
 
@@ -33,4 +32,4 @@ ln -s "${out_dir}"/* "${target_path}/bin/"
 # Clean up
 rm -rf /tmp/action-shim
 
-update_marker "${marker_path}" "${target_path}" "${version}" "${install_tools}" "${build_mode}"
+update_automatic_marker "${FEATURE_ID}" "${target_path}"

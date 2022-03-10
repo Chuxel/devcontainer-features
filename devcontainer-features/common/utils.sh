@@ -129,6 +129,7 @@ find_version_from_git_tags() {
     echo "Adjusted ${variable_name}=${!variable_name}"
 }
 
+
 # Checks if a marker file exists with the correct contents
 # check_marker <marker path> [argument to be validated]...
 check_marker() {
@@ -149,6 +150,43 @@ update_marker() {
     shift
     mkdir -p "$(dirname "${marker_path}")"
     echo "$(echo "$@")" > "${marker_path}"
+}
+
+# Checks if a marker file exists with the correct contents
+# check_automatic_marker <feature id> <target path>
+check_automatic_marker() {
+    local feature_id="$1"
+    local target_path="${2:-/usr/local}"
+    local marker_path="${target_path}/etc/dev-container-features/${feature_id}.marker"
+    get_automatic_marker_contents "$@"
+    local verifier_string="${__retval}"
+    unset __retval
+    if [ -e "${marker_path}" ] && [ "${verifier_string}" = "$(cat ${marker_path})" ]; then
+        return 1
+    else 
+        return 0
+    fi
+}
+
+
+# Updates marker for future checking using automatic logic
+# update_marker <feature id> <target path> [optional additional verifiers...]
+update_automatic_marker() {
+    local feature_id="$1"
+    local target_path="${2:-/usr/local}"
+    local marker_path="${target_path}/etc/dev-container-features/${feature_id}.marker"
+    mkdir -p "${target_path}/etc/dev-container-features"
+    get_automatic_marker_contents "$@" 
+    echo "${__retval}" > "${marker_path}"
+    unset __retval
+}
+
+# Marker generator
+# get_marker_text <feature id> [optional additional verifiers...]
+get_automatic_marker_contents() {
+    get_buld_arg_env_var_name "$1"
+    local marker_text="$@\n$(declare -x | grep -E "^declare -x ${__retval}_")"
+    __retval="$(echo "${marker_text}" | sha256sum | cut -d ' ' -f 1)"
 }
 
 # Checks if command exists, installs it if not
