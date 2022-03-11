@@ -39,6 +39,25 @@
 			}
 		},
 		{
+			"id": "postgres",
+			"name": "PostgreSQL",
+			"options": {
+				"version": {
+					"type": "string",
+					"proposals": [
+						"latest"
+					],
+					"default": "latest",
+					"description": "Version of PostgreSQL to install"
+				},
+				"clientOnly": {
+					"type": "boolean",
+					"default": false,
+					"description": "Only install the PostgreSQL client"
+				}
+			}
+		},
+		{
 			"id": "packcli",
 			"name": "Buildpacks.io pack CLI",
 			"options": {
