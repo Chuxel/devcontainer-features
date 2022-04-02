@@ -5,7 +5,7 @@ ENV CNB_USER_ID=1000
 ENV CNB_GROUP_ID=1000
 ENV CNB_STACK_ID="io.buildpacks.stacks.bionic"
 LABEL io.buildpacks.stack.id="io.buildpacks.stacks.bionic"
-LABEL io.buildpacks.stack.mixins='["libexpat1"]'
+LABEL io.buildpacks.stack.mixins='["libexpat1", "libcurl4", "libargon2-0", "libedit2", "libgd3", "libmagickwand-6.q16-3", "libonig4", "libxml2", "libyaml-0-2"]'
 
 # Add required non-root user
 RUN groupadd cnb --gid ${CNB_GROUP_ID} && \
@@ -22,7 +22,16 @@ RUN apt-get update \
         gnupg2 \
         dirmngr \
         procps \
+        # Add mixins required by paketo buildpacks
         libexpat1 \
+        libcurl4 \
+        libargon2-0 \
+        libedit2 \
+        libgd3 \
+        libmagickwand-6.q16-3 \
+        libonig4 \
+        libxml2 \
+        libyaml-0-2 \
     && ldconfig \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
