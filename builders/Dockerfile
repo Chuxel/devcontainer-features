@@ -5,6 +5,7 @@ ENV CNB_USER_ID=1000
 ENV CNB_GROUP_ID=1000
 ENV CNB_STACK_ID="io.buildpacks.stacks.bionic"
 LABEL io.buildpacks.stack.id="io.buildpacks.stacks.bionic"
+LABEL io.buildpacks.stack.mixins='["libexpat1"]'
 
 # Add required non-root user
 RUN groupadd cnb --gid ${CNB_GROUP_ID} && \
@@ -21,6 +22,7 @@ RUN apt-get update \
         gnupg2 \
         dirmngr \
         procps \
+        libexpat1 \
     && ldconfig \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
