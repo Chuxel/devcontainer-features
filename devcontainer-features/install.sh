@@ -92,7 +92,7 @@ chown "${username}" "${DEV_CONTAINER_PROFILE_D}" "${DEV_CONTAINER_ENTRYPOINT_D}"
 # Add profile.d script
 if [ ! -e "${DEV_CONTAINER_CONFIG_DIR}/env-bootstrap.sh" ]; then
 cat << EOF > "${DEV_CONTAINER_CONFIG_DIR}/env-bootstrap.sh"
-if [ -z "\${DEV_CONTAINER_ENV_BOOSTRAP_DONE}" ] && [ -d "${DEV_CONTAINER_PROFILE_D}" ]; then
+if [ -z "\${DEV_CONTAINER_ENV_BOOSTRAP_DONE}" ] && [ -d "${DEV_CONTAINER_PROFILE_D}" ] && [ "$(ls "${DEV_CONTAINER_PROFILE_D}" | wc -l)" != "0" ]; then
     for script in "${DEV_CONTAINER_PROFILE_D}"/*; do
         if [ -r "\$script" ]; then
             . \$script
@@ -110,7 +110,7 @@ symlink_if_ne "${DEV_CONTAINER_CONFIG_DIR}/env-bootstrap.sh" /etc/profile.d/9999
 if [ ! -e "${DEV_CONTAINER_CONFIG_DIR}/entrypoint-bootstrap.sh" ]; then
 cat << EOF > "${DEV_CONTAINER_CONFIG_DIR}/entrypoint-bootstrap.sh"
 #!/bin/bash
-if [ -z "\${DEV_CONTAINER_ENTRYPOINTS_DONE}" ] && [ -d "${DEV_CONTAINER_ENTRYPOINT_D}" ] && [ -d "${DEV_CONTAINER_ENTRYPOINT_D}" ] && [ "$(ls "${DEV_CONTAINER_ENTRYPOINT_D}" | wc -l)" != "0" ]; then
+if [ -z "\${DEV_CONTAINER_ENTRYPOINTS_DONE}" ] && [ -d "${DEV_CONTAINER_ENTRYPOINT_D}" ] && [ "$(ls "${DEV_CONTAINER_ENTRYPOINT_D}" | wc -l)" != "0" ]; then
     for entrypoint in "${DEV_CONTAINER_ENTRYPOINT_D}"/*; do
         if [ -r "\${entrypoint}" ]; then
             "\${entrypoint}"

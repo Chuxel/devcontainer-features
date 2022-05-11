@@ -47,7 +47,7 @@ add_to_top_of_file /etc/zsh/zshenv /etc/zsh
 mkdir -p "${COMMON_ENTRYPOINT_D}"
 cat << EOF > "${COMMON_CONFIG_ROOT}/entrypoint-bootstrap.sh"
 #!/bin/bash
-if [ -z "\${DEV_CONTAINER_ENTRYPOINTS_DONE}" ] && [ -d "${COMMON_ENTRYPOINT_D}" ]; then
+if [ -z "\${DEV_CONTAINER_ENTRYPOINTS_DONE}" ] && [ -d "${COMMON_ENTRYPOINT_D}" ] && [ "$(ls "${COMMON_ENTRYPOINT_D}" | wc -l)" != "0" ]; then
     for entrypoint in "${COMMON_ENTRYPOINT_D}"/*; do
         if [ -r "\${entrypoint}" ]; then
             "\${entrypoint}"
