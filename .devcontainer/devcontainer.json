@@ -28,5 +28,5 @@
 		},
 		"chuxel/devcontainer-features/googlechrome": "latest"
 	},
-	"postCreateCommand": ". /usr/local/share/nvm/nvm.sh && npm install -g @vscode/dev-container-cli"
+	"postCreateCommand": ". /usr/local/share/nvm/nvm.sh && npm install -g @devcontainers/cli"
 }
